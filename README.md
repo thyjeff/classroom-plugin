@@ -12,7 +12,7 @@ Upload documents to Google Classroom from CLI, with fallback to Drive links for 
 - 📋 List courses and assignments
 - ➕ Create new assignments via CLI
 - 🔐 OAuth 2.0 authentication
-- 🤖 Works with OpenCode, Cursor, or standalone CLI
+- 🤖 Works with **any AI agent** - OpenCode, Cursor, Claude, GitHub Copilot, or standalone CLI
 
 ## Installation
 
@@ -64,17 +64,29 @@ py scripts/classroom_upload.py \
 | `--create-assignment --course-id ID --title "Name"` | Create new assignment |
 | `--drive-only` | Upload to Drive only (no Classroom) |
 
-## OpenCode Plugin
+## AI Agent Plugin
 
-Copy the plugin to your global plugins directory:
+Copy the plugin to your agent's plugins directory:
 
+### OpenCode (Global)
 ```bash
-# Windows
 copy plugins\classroom-upload.ts %APPDATA%\opencode\plugins\
-
-# Or use in project
-.copy .opencode\plugins\
 ```
+
+### OpenCode (Project)
+```bash
+copy .opencode\plugins\ classroom-uploader.ts
+```
+
+### Cursor
+The plugin files are already in `.cursor-plugin/` directory.
+
+### Note on OpenCode/Cursor Global Plugins
+
+The OpenCode plugin is stored in your global config:
+- **Windows**: `%APPDATA%\OpenCode\plugins\classroom-upload.ts`
+
+For others to use, they need to copy the plugin to their own setup or create their own in their global config directory.
 
 ### Available Tools
 

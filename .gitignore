@@ -3,3 +3,5 @@ token.json
 __pycache__/
 *.pyc
 web/firebase-config.js
+test*.txt
+*.log
