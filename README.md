@@ -1,144 +1,157 @@
-# Google Classroom Uploader
+# classroom-plugin
 
-Upload documents to Google Classroom from CLI, with fallback to Drive links for assignments not created via API.
+A CLI plugin for uploading documents to Google Classroom — with automatic fallback to Drive links when Classroom API restrictions apply. Works with Cursor, Claude, and any AI agent, or standalone from the terminal.
 
-![PyPI Version](https://img.shields.io/pypi/v/classroom-uploader)
-![Python](https://img.shields.io/pypi/pyversions/classroom-uploader)
+---
 
 ## Features
 
-- 📤 Upload files to Google Classroom assignments
-- 🔄 Auto-fallback to Google Drive link if Classroom API fails
-- 📋 List courses and assignments
-- ➕ Create new assignments via CLI
-- 🔐 OAuth 2.0 authentication
-- 🤖 Works with **any AI agent** - OpenCode, Cursor, Claude, GitHub Copilot, or standalone CLI
+- Upload files to Google Classroom assignments
+- Auto-fallback to Google Drive link on API permission errors
+- List courses and assignments
+- Create new assignments via CLI
+- OAuth 2.0 authentication (token persisted locally)
+- Dry-run mode for safe validation before upload
+- Works with Cursor, Claude Code, GitHub Copilot, or standalone CLI
+
+---
+
+## Prerequisites
+
+- Python 3.10+
+- A Google Cloud project with **Classroom API** and **Drive API** enabled
+- A Firebase project (for the local login page)
+
+---
 
 ## Installation
 
-### Prerequisites
-
 ```bash
-# Install Python dependencies
-py -m pip install -r requirements.txt
+pip install -r requirements.txt
 ```
 
-### Setup (First Time)
+---
+
+## Setup (First Time)
 
 Run the interactive setup wizard:
 
 ```bash
-py scripts/setup.py
+python scripts/setup.py
 ```
 
-This will guide you through:
-1. Firebase config (for login page)
+This guides you through:
+1. Firebase config (for the local login page)
 2. Google Cloud OAuth credentials
-3. Enable required APIs
-4. Test connection
+3. OAuth consent screen configuration
+4. API enablement check
+5. Connection test
 
-## Quick Usage
+---
 
+## Usage
+
+### List courses
 ```bash
-# List your courses
-py scripts/classroom_upload.py --list-courses
+python scripts/classroom_upload.py --list-courses
+```
 
-# List assignments for a course
-py scripts/classroom_upload.py --list-coursework --course-id "COURSE_ID"
+### List assignments for a course
+```bash
+python scripts/classroom_upload.py --list-coursework --course-id "COURSE_ID"
+```
 
-# Upload file to assignment
-py scripts/classroom_upload.py \
+### Upload and turn in
+```bash
+python scripts/classroom_upload.py \
   --file "homework.docx" \
-  --new-name "John-Homework.docx" \
+  --new-name "Homework-1.docx" \
   --course-id "123456" \
   --coursework-id "789012" \
   --turn-in
 ```
 
-## Commands
-
-| Command | Description |
-|---------|-------------|
-| `--list-courses` | List all your Google Classroom courses |
-| `--list-coursework --course-id ID` | List assignments in a course |
-| `--create-assignment --course-id ID --title "Name"` | Create new assignment |
-| `--drive-only` | Upload to Drive only (no Classroom) |
-
-## AI Agent Plugin
-
-Copy the plugin to your agent's plugins directory:
-
-### OpenCode (Global)
+### Upload to Drive only (skip Classroom)
 ```bash
-copy plugins\classroom-upload.ts %APPDATA%\opencode\plugins\
+python scripts/classroom_upload.py \
+  --file "doc.docx" \
+  --new-name "doc-renamed.docx" \
+  --drive-only
 ```
 
-### OpenCode (Project)
+### Dry run (validate without uploading)
 ```bash
-copy .opencode\plugins\ classroom-uploader.ts
+python scripts/classroom_upload.py \
+  --file "doc.docx" \
+  --new-name "doc-renamed.docx" \
+  --course-id "123456" \
+  --coursework-id "789012" \
+  --dry-run
 ```
+
+---
+
+## CLI Reference
+
+| Flag | Description |
+|---|---|
+| `--file PATH` | Path to the local file |
+| `--new-name NAME` | New filename (extension must match unless `--allow-extension-change`) |
+| `--course-id ID` | Google Classroom course ID |
+| `--coursework-id ID` | Google Classroom coursework ID |
+| `--turn-in` | Submit the assignment after attaching |
+| `--drive-only` | Upload to Drive only, skip Classroom |
+| `--dry-run` | Validate auth and rename without modifying files |
+| `--allow-extension-change` | Allow renaming to a different extension |
+| `--list-courses` | List all enrolled courses |
+| `--list-coursework` | List assignments for a course (requires `--course-id`) |
+| `--create-assignment` | Create a new assignment (requires `--course-id` and `--assignment-title`) |
+
+---
+
+## AI Agent Integration
 
 ### Cursor
-The plugin files are already in `.cursor-plugin/` directory.
+Plugin files are in `.cursor-plugin/`. Cursor picks them up automatically from the project root.
 
-### Note on OpenCode/Cursor Global Plugins
+### Claude / Claude Code
+Drop the `agents/`, `commands/`, and `skills/` folders into your Claude project config.
 
-The OpenCode plugin is stored in your global config:
-- **Windows**: `%APPDATA%\OpenCode\plugins\classroom-upload.ts`
+### Other agents
+Use the `commands/` markdown files as prompts or tool definitions.
 
-For others to use, they need to copy the plugin to their own setup or create their own in their global config directory.
-
-### Available Tools
-
-```python
-# Upload to Classroom (auto-fallback to Drive)
-classroom-upload --file "doc.docx" --new-name "name.docx" --course-id "123" --coursework-id "456"
-
-# Upload to Drive only
-classroom-drive-only --file "doc.docx" --new-name "name.docx"
-
-# List courses
-classroom-list-courses
-
-# List coursework
-classroom-list-coursework --course-id "123"
-
-# Create assignment
-classroom-create-assignment --course-id "123" --title "Homework 1"
-```
+---
 
 ## Troubleshooting
 
-### "@ProjectPermissionDenied" Error
-
-This happens because the assignment was created manually in Google Classroom, not via API. 
+### `@ProjectPermissionDenied` error
+This occurs when the assignment was created manually in Classroom rather than via API.
 
 **Solutions:**
-1. Create assignments via API: `classroom-create-assignment`
-2. Use `--drive-only` and manually paste the Drive link in Classroom
-3. Create assignment in Classroom first, then run upload within 24 hours
+- Create the assignment via API: `--create-assignment`
+- Use `--drive-only` and paste the Drive link manually into Classroom
+- Run the upload within 24 hours of creating the assignment in Classroom
 
 ### Missing APIs
-
-Make sure these APIs are enabled in Google Cloud Console:
+Enable these in [Google Cloud Console](https://console.cloud.google.com/):
 - Google Classroom API
 - Google Drive API
 
-### Token Expiry
-
-Delete `token.json` to re-authenticate:
+### Token expired
+Delete `token.json` and re-authenticate:
 ```bash
-del token.json
+rm token.json
 ```
+
+---
 
 ## Security
 
-- Never commit `credentials.json` or `token.json` to version control
-- Add to `.gitignore`:
-  ```
-  credentials.json
-  token.json
-  ```
+- `credentials.json` and `token.json` are excluded from version control via `.gitignore`
+- Never commit OAuth credentials or tokens
+- The Firebase config in `web/firebase-config.js` is also gitignored — only the example file is tracked
+
+---
 
 ## License
 

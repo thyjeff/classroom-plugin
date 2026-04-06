@@ -5,3 +5,6 @@ __pycache__/
 web/firebase-config.js
 test*.txt
 *.log
+.cursor-plugin/
+.DS_Store
+Thumbs.db
