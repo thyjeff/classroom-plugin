@@ -1,0 +1,12 @@
+---
+description: Guardrails for finding, renaming, and uploading documents to Google Classroom.
+alwaysApply: false
+---
+
+# Classroom upload safety
+
+- Confirm the source file path and file type before renaming.
+- Preserve the original file extension when changing names.
+- Use deterministic naming format: `<course>-<assignment>-<student>-<date>`.
+- Never expose OAuth secrets, tokens, or private links in logs.
+- Before upload, verify target Classroom course and assignment identifiers.
